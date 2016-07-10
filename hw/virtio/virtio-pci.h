@@ -31,6 +31,7 @@
 #ifdef CONFIG_VHOST_SCSI
 #include "hw/virtio/vhost-scsi.h"
 #endif
+#include "hw/virtio/virtio-pstore.h"
 
 typedef struct VirtIOPCIProxy VirtIOPCIProxy;
 typedef struct VirtIOBlkPCI VirtIOBlkPCI;
@@ -44,6 +45,7 @@ typedef struct VirtIOInputPCI VirtIOInputPCI;
 typedef struct VirtIOInputHIDPCI VirtIOInputHIDPCI;
 typedef struct VirtIOInputHostPCI VirtIOInputHostPCI;
 typedef struct VirtIOGPUPCI VirtIOGPUPCI;
+typedef struct VirtIOPstorePCI VirtIOPstorePCI;
 
 /* virtio-pci-bus */
 
@@ -322,6 +324,18 @@ struct VirtIOInputHostPCI {
 struct VirtIOGPUPCI {
     VirtIOPCIProxy parent_obj;
     VirtIOGPU vdev;
+};
+
+/*
+ * virtio-pstore-pci: This extends VirtioPCIProxy.
+ */
+#define TYPE_VIRTIO_PSTORE_PCI "virtio-pstore-pci"
+#define VIRTIO_PSTORE_PCI(obj) \
+        OBJECT_CHECK(VirtIOPstorePCI, (obj), TYPE_VIRTIO_PSTORE_PCI)
+
+struct VirtIOPstorePCI {
+    VirtIOPCIProxy parent_obj;
+    VirtIOPstore vdev;
 };
 
 /* Virtio ABI version, if we increment this, we break the guest driver. */

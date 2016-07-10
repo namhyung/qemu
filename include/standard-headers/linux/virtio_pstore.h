@@ -1,9 +1,6 @@
-#ifndef _LINUX_VIRTIO_IDS_H
-#define _LINUX_VIRTIO_IDS_H
-/*
- * Virtio IDs
- *
- * This header is BSD licensed so anyone can use the definitions to implement
+#ifndef _LINUX_VIRTIO_PSTORE_H
+#define _LINUX_VIRTIO_PSTORE_H
+/* This header is BSD licensed so anyone can use the definitions to implement
  * compatible drivers/servers.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,19 +25,52 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE. */
+#include "standard-headers/linux/types.h"
+#include "standard-headers/linux/virtio_types.h"
+#include "standard-headers/linux/virtio_ids.h"
+#include "standard-headers/linux/virtio_config.h"
 
-#define VIRTIO_ID_NET		1 /* virtio net */
-#define VIRTIO_ID_BLOCK		2 /* virtio block */
-#define VIRTIO_ID_CONSOLE	3 /* virtio console */
-#define VIRTIO_ID_RNG		4 /* virtio rng */
-#define VIRTIO_ID_BALLOON	5 /* virtio balloon */
-#define VIRTIO_ID_RPMSG		7 /* virtio remote processor messaging */
-#define VIRTIO_ID_SCSI		8 /* virtio scsi */
-#define VIRTIO_ID_9P		9 /* 9p virtio console */
-#define VIRTIO_ID_RPROC_SERIAL 11 /* virtio remoteproc serial link */
-#define VIRTIO_ID_CAIF	       12 /* Virtio caif */
-#define VIRTIO_ID_GPU          16 /* virtio GPU */
-#define VIRTIO_ID_INPUT        18 /* virtio input */
-#define VIRTIO_ID_PSTORE       22 /* virtio pstore */
+#define VIRTIO_PSTORE_CMD_NULL   0
+#define VIRTIO_PSTORE_CMD_OPEN   1
+#define VIRTIO_PSTORE_CMD_READ   2
+#define VIRTIO_PSTORE_CMD_WRITE  3
+#define VIRTIO_PSTORE_CMD_ERASE  4
+#define VIRTIO_PSTORE_CMD_CLOSE  5
 
-#endif /* _LINUX_VIRTIO_IDS_H */
+#define VIRTIO_PSTORE_TYPE_UNKNOWN  0
+#define VIRTIO_PSTORE_TYPE_DMESG    1
+
+#define VIRTIO_PSTORE_FL_COMPRESSED  1
+
+struct virtio_pstore_req {
+    uint16_t cmd;
+    uint16_t type;
+    uint32_t flags;
+    uint64_t id;
+    uint32_t count;
+    uint32_t reserved;
+};
+
+struct virtio_pstore_res {
+    uint16_t cmd;
+    uint16_t type;
+    uint32_t ret;
+};
+
+struct virtio_pstore_fileinfo {
+    uint64_t id;
+    uint32_t count;
+    uint16_t type;
+    uint16_t unused;
+    uint32_t flags;
+    uint32_t len;
+    uint64_t time_sec;
+    uint32_t time_nsec;
+    uint32_t reserved;
+};
+
+struct virtio_pstore_config {
+    uint32_t bufsize;
+};
+
+#endif /* _LINUX_VIRTIO_PSTORE_H */
