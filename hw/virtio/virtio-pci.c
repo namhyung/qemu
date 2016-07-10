@@ -2414,6 +2414,59 @@ static const TypeInfo virtio_host_pci_info = {
 };
 #endif
 
+/* virtio-pstore-pci */
+
+static void virtio_pstore_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
+{
+    VirtIOPstorePCI *vps = VIRTIO_PSTORE_PCI(vpci_dev);
+    DeviceState *vdev = DEVICE(&vps->vdev);
+    Error *err = NULL;
+
+    qdev_set_parent_bus(vdev, BUS(&vpci_dev->bus));
+    object_property_set_bool(OBJECT(vdev), true, "realized", &err);
+    if (err) {
+        error_propagate(errp, err);
+        return;
+    }
+}
+
+static void virtio_pstore_pci_class_init(ObjectClass *klass, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(klass);
+    VirtioPCIClass *k = VIRTIO_PCI_CLASS(klass);
+    PCIDeviceClass *pcidev_k = PCI_DEVICE_CLASS(klass);
+
+    k->realize = virtio_pstore_pci_realize;
+    set_bit(DEVICE_CATEGORY_MISC, dc->categories);
+
+    pcidev_k->vendor_id = PCI_VENDOR_ID_REDHAT_QUMRANET;
+    pcidev_k->device_id = PCI_DEVICE_ID_VIRTIO_PSTORE;
+    pcidev_k->revision = VIRTIO_PCI_ABI_VERSION;
+    pcidev_k->class_id = PCI_CLASS_OTHERS;
+}
+
+static void virtio_pstore_pci_instance_init(Object *obj)
+{
+    VirtIOPstorePCI *dev = VIRTIO_PSTORE_PCI(obj);
+
+    virtio_instance_init_common(obj, &dev->vdev, sizeof(dev->vdev),
+                                TYPE_VIRTIO_PSTORE);
+    object_property_add_alias(obj, "directory", OBJECT(&dev->vdev),
+                              "directory", &error_abort);
+    object_property_add_alias(obj, "bufsize", OBJECT(&dev->vdev),
+                              "bufsize", &error_abort);
+    object_property_add_alias(obj, "console", OBJECT(&dev->vdev),
+                              "console", &error_abort);
+}
+
+static const TypeInfo virtio_pstore_pci_info = {
+    .name          = TYPE_VIRTIO_PSTORE_PCI,
+    .parent        = TYPE_VIRTIO_PCI,
+    .instance_size = sizeof(VirtIOPstorePCI),
+    .instance_init = virtio_pstore_pci_instance_init,
+    .class_init    = virtio_pstore_pci_class_init,
+};
+
 /* virtio-pci-bus */
 
 static void virtio_pci_bus_new(VirtioBusState *bus, size_t bus_size,
@@ -2483,6 +2536,7 @@ static void virtio_pci_register_types(void)
 #ifdef CONFIG_VHOST_SCSI
     type_register_static(&vhost_scsi_pci_info);
 #endif
+    type_register_static(&virtio_pstore_pci_info);
 }
 
 type_init(virtio_pci_register_types)
